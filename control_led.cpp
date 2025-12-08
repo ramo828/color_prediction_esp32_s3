@@ -1,7 +1,31 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include "control_led.h"
 #include <Arduino.h>
 
-// Default constructor – pinler sabit 6,4,5
+// Defolt konstruktor – pinlər sabit 6,4,5
 ControlLED::ControlLED() {
   _R = 6;
   _G = 4;
@@ -13,8 +37,8 @@ ControlLED::ControlLED() {
   pinMode(_SENSOR, INPUT);
 }
 
-// Parametreli constructor – dışardan pin verilebilir
-ControlLED::ControlLED(ControlLED::Leds *leds) {  // TAM İSİM GEREK!
+// Parametrli konstruktor – kənardan pin verilə bilər
+ControlLED::ControlLED(ControlLED::Leds *leds) {  // TAM AD LAZIMDIR!
   _R = leds->R;
   _G = leds->G;
   _BLUE = leds->B;
@@ -25,7 +49,7 @@ ControlLED::ControlLED(ControlLED::Leds *leds) {  // TAM İSİM GEREK!
   pinMode(_BLUE, OUTPUT);
 }
 
-// LED kontrol fonksiyonları
+// LED idarəetmə funksiyaları
 void ControlLED::allLedsOff() {
   digitalWrite(_R, LOW);
   digitalWrite(_G, LOW);
@@ -48,7 +72,7 @@ void ControlLED::ledOn(int p) {
 void ControlLED::ledOff(int p) {
   digitalWrite(p, LOW);
 }
-// 5 ölçüm ortala
+// 5 ölçməni ortala
 int ControlLED::readAvg() {
   int sum = 0;
   for (int i = 0; i < 10; i++) {

@@ -4,17 +4,17 @@ import pandas as pd
 
 # df = pd.read_csv("color_dataset_last1.csv")
 
-# print(f"Önceki veri sayısı : {len(df):,}")
+# print(f"Əvvəlki verilərin sayı : {len(df):,}")
 
-# # R > 3930 olan satırları SİL (tam istediğin gibi)
-# df = df[df['R'] <= 3930]   # 3930 ve altı kalır, üstü gider
+# # R > 3930 olan sətirləri SİL (tam istədiyin kimi)
+# df = df[df['R'] <= 3930]   # 3930 və aşağı qalır, yuxarı gedir
 
-# print(f"Sonraki veri sayısı: {len(df):,}")
-# print(f"Silinen satır sayısı: {len(pd.read_csv('color_dataset_last1.csv')) - len(df):,}")
+# print(f"Sonrakı verilərin sayı: {len(df):,}")
+# print(f"Silinən sətir sayı: {len(pd.read_csv('color_dataset_last1.csv')) - len(df):,}")
 
-# # Temiz dosyayı kaydet
+# # Təmiz faylı yadda saxla
 # df.to_csv("color_dataset_last1_TEMIZ.csv", index=False)
-# print("Temiz dosya kaydedildi → color_dataset_last1_TEMIZ.csv")
+# print("Təmiz fayl yadda saxlanıldı → color_dataset_last1_TEMIZ.csv")
 
 # # 1-ci dataset (məsələn təmiz kağız)
 df1 = pd.read_csv("color_dataset.csv")

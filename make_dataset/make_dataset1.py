@@ -1,4 +1,4 @@
-# RƏNG VERİ TOPLAYICI – RENGARENK & %100 HATASIZ VƏ TƏHLÜKƏSİZ VERSİYA
+# RƏNG VERİ TOPLAYICI – RƏNGA RƏNG & %100 XƏTASIZ VƏ TƏHLÜKƏSİZ VERSİYA
 # Köhnə verilər qorunur, kanal eksikliyi olsa belə heç vaxt çökməz!
 
 import serial
@@ -21,20 +21,20 @@ RENKLER = [
     "Indigo","Violet","Beige","Lavender","Turquoise","Coral","Khaki","Fuchsia","Aquamarine","Salmon"
 ]
 
-# ========================= BİP SESİ =========================
+# ========================= BİP SƏSİ =========================
 def bip(say=1):
     for _ in range(say):
         os.system('paplay /usr/share/sounds/freedesktop/stereo/complete.oga &> /dev/null || echo -e "\a"')
 
 # ========================= BAŞLIQ – GÖZ ALICI =========================
 print("\n\033[95m" + "═" * 80)
-print("    RƏNG VERİ TOPLAYICI – RENGARENK & %100 TƏHLÜKƏSİZ VƏ GÖZƏL!")
-print("    Köhnə verilər qorunur • Kanal eksik olsa belə ÇÖKMEZ!")
+print("    RƏNG VERİ TOPLAYICI – RƏNGA RƏNG & %100 TƏHLÜKƏSİZ VƏ GÖZƏL!")
+print("    Köhnə verilər qorunur • Kanal eksik olsa belə ÇÖKMƏZ!")
 print("    Artıq heç bir IndexError almayacaqsan!")
 print("═" * 80 + "\033[0m\n")
 bip(3)
 
-# CSV kontrol
+# CSV yoxlanışı
 if not os.path.exists(CSV_FILE):
     print(f"\033[93mİlk dəfə işlədilir → {CSV_FILE} yaradılır...\033[0m")
     with open(CSV_FILE, 'w', newline='', encoding='utf-8') as f:
@@ -42,7 +42,7 @@ if not os.path.exists(CSV_FILE):
 else:
     print(f"\033[92mFayl tapıldı: {CSV_FILE} → Köhnə verilər qorunacaq!\033[0m")
 
-# Mevcut durumu oxu
+# Mövcud vəziyyəti oxu
 try:
     df = pd.read_csv(CSV_FILE)
     tamamlanan = df['Rəng'].value_counts()
@@ -84,20 +84,20 @@ for idx in range(basla_index, len(RENKLER)):
         continue
 
     print(f"\n\033[1;97;41m >>> {renk.upper():12} RƏNGİ ÜÇÜN HAZIRLAŞ! <<< \033[0m")
-    print(f"\033[93mEksik örnək sayı: {lazim}\033[0m")
+    print(f"\033[93mÇatışmayan örnək sayı: {lazim}\033[0m")
 
-    # Klavye tamponunu temizle (yanlışlıkla basılan Enter'ları sil)
+    # Klaviatura buferini təmizlə (səhvən basılan Enter-ləri sil)
     try:
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
     except:
         pass
 
-    input(f"\033[1;33m{renk} LED-i yandır, sensörü tut → ENTER bas...\033[0m")
+    input(f"\033[1;33m{renk} LED-i yandır, sensoru tut → ENTER bas...\033[0m")
 
-    # Serial tamponunu temizle (eski verileri sil)
+    # Serial buferini təmizlə (köhnə verilərlə sil)
     ser.reset_input_buffer()
-    time.sleep(0.5)  # Yarım saniye bekle
-    ser.reset_input_buffer()  # Tekrar temizle (garanti olsun)
+    time.sleep(0.5)  # Yarım saniyə gözlə
+    ser.reset_input_buffer()  # Təkrar təmizlə (zəmanət olsun)
 
     data = {'R': [], 'G': [], 'B': [], 'W': [], 'D': []}
     print(f"\n\033[96m{renk} üçün verilər toplanır → {mevcut}/{SAMPLES}\033[0m", end="")
@@ -137,4 +137,4 @@ print(f"    Fayl: {CSV_FILE} → {SAMPLES*30:,}+ örnək!")
 print("    İndi %96+ dəqiqlik səni gözləyir!")
 print("═" * 80 + "\033[0m")
 bip(15)
-print("\n\033[1;36mTebrikler kanka! İndi modeli yenidən öyrət, fəth et!\033[0m ❤️")
+print("\n\033[1;36mTəbriklər dostum! İndi modeli yenidən öyrət, fəth et!\033[0m ❤️")

@@ -28,9 +28,9 @@ print("║ Hər rəng üçün 2000 örnək toplanacaq ║")
 print("╚══════════════════════════════════════════════════════════╝\033[0m\n")
 def bip(times=1):
     for _ in range(times):
-        # 800 Hz, 200 ms → klasik beep sesi
+        # 800 Hz, 200 ms → klassik bip səsi
         os.system("paplay /usr/share/sounds/freedesktop/stereo/complete.oga &> /dev/null")
-        # Alternatif kısa ses dosyası yoksa şu da olur:
+        # Alternativ qısa səs faylı yoxdursa bu da olar:
         # os.system("paplay /usr/share/sounds/ubuntu/stereo/bell.ogg &> /dev/null")
 bip(1)
 print(f"{PORT} portuna qoşulur...")
@@ -47,18 +47,18 @@ print("\033[93mLED-i yandır → sensörü rəngə tut → ENTER-a bas → veril
 
 for renk in RENKLER:
     print(f"\n\033[1;97;41m >>> {renk.upper():12} ÜÇÜN HAZIRLAŞ! <<< \033[0m")
-    # Klavye tamponunu temizle (yanlışlıkla basılan Enter'ları sil)
+    # Klaviatura buferini təmizlə (səhvən basılan Enter-ləri sil)
     try:
         termios.tcflush(sys.stdin, termios.TCIOFLUSH)
     except:
         pass
 
-    input(f"\033[1;33m{renk} LED-i yandırdım, sensörü rəngə tut → ENTER-a bas...\033[0m")
+    input(f"\033[1;33m{renk} LED-i yandırdım, sensoru rəngə tut → ENTER-a bas...\033[0m")
 
-    # Serial tamponunu temizle (eski verileri sil)
+    # Serial buferini təmizlə (köhnə verilərlə sil)
     ser.reset_input_buffer()
-    time.sleep(0.5)  # Yarım saniye bekle
-    ser.reset_input_buffer()  # Tekrar temizle
+    time.sleep(0.5)  # Yarım saniyə gözlə
+    ser.reset_input_buffer()  # Təkrar təmizlə
 
     r_siyahisi = []
     g_siyahisi = []

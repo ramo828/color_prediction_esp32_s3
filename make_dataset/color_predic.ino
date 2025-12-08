@@ -58,5 +58,5 @@ void loop() {
   allLedsOff();
 
   Serial.printf("R:%d\nG:%d\nB:%d\nW:%d\nD:%d\n", r, g, b, w, d);
-  delay(500);  // toplam ~1 saniyede 1 ölçüm → modelle aynı!
+  delay(500);  // cəmi ~1 saniyədə 1 ölçmə → modellə eyni!
 }
