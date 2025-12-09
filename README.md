@@ -12,6 +12,11 @@ This project is a state-of-the-art **TinyML color recognition system** built on 
 
 ![Confusion Matrix](confusion_matrix_BUTUN_DATASET_100_percent.png)
 
+### 📈 Model Training Performance
+The model was trained for over 100 epochs. As seen in the graph below, the **Accuracy (Orange)** rapidly climbed to nearly 100%, while **Loss (Blue)** dropped to near zero, indicating a highly stable and well-fitted model without significant overfitting.
+
+![Training Graph](training_graph.png)
+
 ### 🛠 Hardware Setup & 3D Print
 The physical design is critical for accuracy.
 *   **Structure**: A custom 3D-printed **circular pipe**.
@@ -54,6 +59,11 @@ This project requires `model.tflite` to be stored in the ESP32's flash memory vi
 ### 📌 Genel Bakış
 Bu proje, **ESP32-S3** üzerinde çalışan ve **120.000 verilik devasa bir veri seti** ile eğitilmiş profesyonel bir renk tanıma sistemidir. 30 rengin 29'unda **%100 doğruluk** oranına sahiptir. Standart sensörler yerine, LDR ve RGB LED'lerden oluşan özel bir optik düzenek kullanır.
 
+### 📈 Model Eğitim Performansı
+Model 100 epoch'tan fazla eğitilmiştir. Aşağıdaki grafikte görüldüğü üzere, **Doğruluk (Accuracy - Turuncu)** hızla %100'e yaklaşmış, **Kayıp (Loss - Mavi)** ise sıfıra inmiştir. Bu, modelin kararlı olduğunu ve verileri mükemmel öğrendiğini gösterir.
+
+![Training Graph](training_graph.png)
+
 ### 🛠 Donanım ve 3D Baskı Detayları
 Sistemin başarısı fiziksel tasarıma bağlıdır.
 *   **Yapı**: 3D yazıcı ile basılmış **dairesel bir boru** yapısıdır.
@@ -91,6 +101,11 @@ Model dosyasını (`model.tflite`) yüklemek için:
 
 ### 📌 Ümumi Məlumat
 Bu layihə, **ESP32-S3** üzərində işləyən və **120.000 nümunəlik (dataset)** böyük bir baza ilə öyrədilmiş süni zəka sistemidir. 30 rəngdən 29-nu **100% dəqiqliklə** tanıyır. Bahalı rəng sensorları əvəzinə, LDR və RGB LED-lərdən ibarət xüsusi mühəndislik həlli istifadə olunur.
+
+### 📈 Modelin Öyrənmə Göstəriciləri
+Model 100-dən çox epoch ərzində məşq etdirilib. Qrafikdən göründüyü kimi, **Dəqiqlik (Accuracy - Narıncı)** sürətlə 100%-ə çatıb, **İtki (Loss - Mavi)** isə sıfıra enib. Bu qrafik modelin rəngləri necə mükəmməl əzbərlədiyini sübut edir.
+
+![Training Graph](training_graph.png)
 
 ### 🛠 Texniki Yaradılış və 3D Çap
 Dəqiq nəticə almaq üçün fiziki quruluş çox önəmlidir:
