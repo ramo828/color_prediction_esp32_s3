@@ -72,7 +72,7 @@ void ControlLED::ledOn(int p) {
 void ControlLED::ledOff(int p) {
   digitalWrite(p, LOW);
 }
-// 5 ölçməni ortala
+// 10 ölçmənin ortalamasını hesabla
 int ControlLED::readAvg() {
   int sum = 0;
   for (int i = 0; i < 10; i++) {

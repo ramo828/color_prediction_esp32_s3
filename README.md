@@ -8,116 +8,116 @@
 ## 🇬🇧 English: High-Precision 30-Color Recognition with TinyML
 
 ### 📌 Overview
-This project is a state-of-the-art **TinyML color recognition system** built on the **ESP32-S3**. Unlike simple RGB sensors, this system uses a standard **LDR (Light Dependent Resistor)** paired with an **RGB LED** to achieve medical-grade color classification accuracy.
+This project is a state-of-the-art **TinyML color recognition system** built on the **ESP32-S3**. It achieves **100% accuracy** (on 29/30 colors) using a massive training dataset of **120,000 samples**. Unlike simple RGB sensors, this system uses a custom **LDR (Light Dependent Resistor)** and **RGB LED** setup to extract **29 advanced optical features**.
 
-By leveraging **TensorFlow Lite for Microcontrollers**, the system extracts **29 advanced optical features** from raw sensor data to distinguishing between 30 distinct colors, including complex shades like "Coral", "Salmon", "Turquoise", and "Silver" vs "Gray".
+![Confusion Matrix](confusion_matrix_BUTUN_DATASET_100_percent.png)
 
-### ✨ Key Features
-*   **30 Distinct Colors**: Detects a wide spectrum including metallic and subtle shades.
-*   **Deep Feature Extraction**: Calculates **29 unique spectral features** (ratios, log-diffs, hyperbolic tangents) from 5 raw readings (Red, Green, Blue, White, Dark).
-*   **Edge AI**: Runs a quantized neural network fully on-device (ESP32-S3).
-*   **Auto-Calibration**: Uses "Dark" and "White" readings to normalize against ambient light and sensor variations.
-*   **High Speed**: ~4 predictions per second.
+### 🛠 Hardware Setup & 3D Print
+The physical design is critical for accuracy.
+*   **Structure**: A custom 3D-printed **circular pipe**.
+*   **Sensor Placement**: The **LDR** is placed in the exact center, **recessed (positioned lower)** to avoid direct interference from the LEDs.
+*   **LED Layout**: Red, Green, and Blue LEDs are mounted around the rim at equal distances.
+*   **Material**: The enclosure **MUST be 3D printed in BLACK**.
+    *   *Why?* Tests showed that light-colored prints (e.g., Light Blue) cause light reflection/leakage that degrades accuracy. Black absorbs stray light.
 
-### 🛠 Hardware Setup
-*   **Microcontroller**: ESP32-S3 (Required for PSRAM & vector instructions).
-*   **Sensor**: GL55xx LDR (Light Dependent Resistor) + 10kΩ Pull-down Resistor.
-*   **Light Source**: Common Anode/Cathode RGB LED.
-*   **Wiring**:
+![Hardware Diagram](hardware_setup.png)
 
-| Component | ESP32-S3 Pin | Function |
+### ⚙️ ESP32-S3 Settings (Arduino IDE V2)
+To build and upload successfully, use the following settings in Arduino IDE:
+
+| Setting | Value | Description |
 | :--- | :--- | :--- |
-| **LDR Sensor** | **GPIO 7** | Analog Input (ADC) |
-| **RGB LED - Red** | **GPIO 6** | Red Light Source |
-| **RGB LED - Green** | **GPIO 4** | Green Light Source |
-| **RGB LED - Blue** | **GPIO 5** | Blue Light Source |
+| **Board** | **ESP32S3 Dev Module** | Select strict ESP32-S3 board |
+| **USB CDC On Boot** | **Enabled** | Required for Serial Monitor |
+| **PSRAM** | **OPI PSRAM** | **CRITICAL**: Code requires external RAM for Tensor Arena |
+| **Partition Scheme** | **Default 4MB with Spiffs** | Or any scheme with ample app space + file system |
+| **Upload Mode** | **UART0 / USB OTG** | Depends on your cable connection |
 
-*(Note: Ensure LDR is shielded from direct external light for best results.)*
+### 📂 How to Upload Filesystem (LittleFS)
+This project requires `model.tflite` to be stored in the ESP32's flash memory via LittleFS.
+1.  **Install Plugin**: For Arduino IDE 2.x, download and install the **ESP32 LittleFS Uploader** (search for `arduino-esp32fs-plugin` specifically for V2 or use the command line tool).
+2.  **Prepare Data**: Ensure the `data` folder (containing `model.tflite`) is in the sketch directory.
+3.  **Upload**:
+    *   Put ESP32-S3 into Bootloader Mode (Hold BOOT, Press RST, Release BOOT).
+    *   Select **Tools > ESP32 Sketch Data Upload** (or `Upload LittleFS`).
+    *   Wait for "LittleFS Image Uploaded" message.
 
-### 🔬 Working Principle
-1.  **Data Acquisition**: The ESP32 cycles the RGB LED (Red, Green, Blue, All On/White) and takes a "Dark" reading (All Off).
-2.  **Feature Engineering**: The raw ADC values are inverted and normalized. Then, complex features are computed (e.g., `salmon_signature`, `silver_fix`, `green_purity`) to mimicking human color perception logic.
-3.  **Inference**: These 29 features are fed into a **TensorFlow Lite** model loaded from the filesystem (`LittleFS`).
-4.  **Prediction**: The model outputs probability scores for all 30 classes, selecting the highest confidence match.
-
-### 🎨 Supported Colors (30)
-Aquamarine, Beige, Black, Blue, Brown, Coral, Cyan, Fuchsia, Gold, Gray, Green, Indigo, Khaki, Lavender, Lime, Magenta, Maroon, Navy, Olive, Orange, Pink, Purple, Red, Salmon, Silver, Teal, Turquoise, Violet, White, Yellow.
-
-### 📂 File Structure
-*   `color_prediction.ino`: Main firmware for real-time inference.
-*   `make_dataset/make_dataset.py`: Python script for collecting high-quality training data.
-*   `control_led.cpp/h`: Low-level hardware abstraction for LED and LDR control.
+### ⚠️ Known Issues
+*   **Lime vs. Green**: The system has **100% accuracy** for 29 colors. However, **Lime** is occasionally misclassified as **Green**.
+    *   *Reason*: In the dataset (and physically), the RGB spectral response for Lime and specific Green shades are nearly identical (same tone/RGB codes), making them statistically indistinguishable even with 120K samples.
 
 ---
 
 <a name="türkçe"></a>
-## 🇹🇷 Türkçe: ESP32-S3 ile Yüksek Hassasiyetli 30 Renk Tanıma Sistemi
+## 🇹🇷 Türkçe: ESP32-S3 ile Yüksek Hassasiyetli Renk Tanıma
 
 ### 📌 Genel Bakış
-Bu proje, **ESP32-S3** üzerinde çalışan gelişmiş bir **TinyML renk tanıma sistemidir**. Pahalı renk sensörleri yerine, sadece basit bir **LDR (Işığa Duyarlı Direnç)** ve **RGB LED** kullanarak endüstriyel kalitede renk ayrımı yapar.
+Bu proje, **ESP32-S3** üzerinde çalışan ve **120.000 verilik devasa bir veri seti** ile eğitilmiş profesyonel bir renk tanıma sistemidir. 30 rengin 29'unda **%100 doğruluk** oranına sahiptir. Standart sensörler yerine, LDR ve RGB LED'lerden oluşan özel bir optik düzenek kullanır.
 
-Sistem, **TensorFlow Lite** teknolojisini kullanarak, ham sensör verilerinden **29 karmaşık optik özellik** çıkarır. Bu sayede "Mercan (Coral)" ile "Somon (Salmon)" veya "Gümüş (Silver)" ile "Gri (Gray)" gibi ayırt edilmesi zor renkleri bile kusursuzca tanır.
+### 🛠 Donanım ve 3D Baskı Detayları
+Sistemin başarısı fiziksel tasarıma bağlıdır.
+*   **Yapı**: 3D yazıcı ile basılmış **dairesel bir boru** yapısıdır.
+*   **Sensör Konumu**: **LDR**, borunun tam ortasında ve **biraz aşağıda (gömülü)** yer alır. Bu sayede LED ışıklarının doğrudan vurması engellenir.
+*   **LED Yerleşimi**: Kırmızı, Yeşil ve Mavi LED'ler, LDR'nin etrafına eşit aralıklarla dizilmiştir.
+*   **Malzeme Rengi**: Baskı mutlaka **SİYAH (Black)** renkte olmalıdır.
+    *   *Neden?* Açık mavi (Light Blue) gibi renklerle yapılan denemelerde ışık sızması ve yansıması hatalı sonuçlara yol açmıştır. Siyah renk en iyi izolasyonu sağlar.
 
-### ✨ Temel Özellikler
-*   **30 Farklı Renk**: Metalik ve pastel tonlar dahil geniş renk yelpazesi.
-*   **Derin Özellik Çıkarımı**: Ham verilerden (Kırmızı, Yeşil, Mavi, Beyaz, Karanlık) türetilen **29 matematiksel özellik**.
-*   **Uçta Yapay Zeka (Edge AI)**: İnternet gerektirmez, tüm işlem ESP32 işlemcisinde yapılır.
-*   **Otomatik Kalibrasyon**: Ortam ışığından etkilenmemek için "Karanlık" ve "Beyaz" referans değerlerini kullanır.
+### ⚙️ ESP32-S3 Ayarları (Arduino IDE V2)
+Projenin doğru çalışması için Arduino IDE ayarları aşağıdaki görseldeki (veya tablodaki) gibi olmalıdır:
 
-### 🛠 Donanım Kurulumu
-*   **Mikrodenetleyici**: ESP32-S3.
-*   **Sensör**: LDR + 10kΩ Direnç.
-*   **Işık Kaynağı**: RGB LED.
-*   **Bağlantı Şeması**:
-
-| Bileşen | ESP32-S3 Pini | Görev |
+| Ayar | Değer | Açıklama |
 | :--- | :--- | :--- |
-| **LDR Sensör** | **GPIO 7** | Analog Okuma (ADC) |
-| **RGB LED - Kırmızı** | **GPIO 6** | Kırmızı Işık |
-| **RGB LED - Yeşil** | **GPIO 4** | Yeşil Işık |
-| **RGB LED - Mavi** | **GPIO 5** | Mavi Işık |
+| **Board (Kart)** | **ESP32S3 Dev Module** | Doğru işlemci seçilmeli |
+| **USB CDC On Boot** | **Enabled** | Seri port (Serial) takibi için şart |
+| **PSRAM** | **OPI PSRAM** | **ÖNEMLİ**: Yapay zeka modeli için ek RAM gereklidir |
+| **Partition Scheme** | **Default 4MB with Spiffs** | Dosya sistemi için alan ayrılmalı |
 
-### 🔬 Çalışma Prensibi
-1.  **Veri Toplama**: Sistem sırasıyla LED'leri yakar (R, G, B, Beyaz) ve bir de sönük (Karanlık) ölçüm alır.
-2.  **Özellik Mühendisliği**: Okunan ham değerler işlenerek `green_purity`, `silver_fix` gibi renk karakteristiğini belirleyen 29 farklı sayısal değere dönüştürülür.
-3.  **Tahminleme**: Bu değerler, eğitilmiş **TensorFlow Lite** modeline girer ve en yüksek olasılıklı renk ekrana yazdırılır.
+### 📂 LittleFS Yükleme (Arduino v2)
+Model dosyasını (`model.tflite`) yüklemek için:
+1.  **Eklenti**: Arduino IDE 2.0 için uygun "LittleFS Uploader" eklentisini kurun.
+2.  **Yükleme**:
+    *   `data` klasörünün proje dosyasında olduğundan emin olun.
+    *   Kartı yükleme moduna alın (BOOT tuşuna basılı tutup Reset'e basın).
+    *   **Tools > Upload Filesystem Image** (veya benzeri) seçeneği ile dosya sistemini yükleyin.
 
-### 🎨 Tanınan Renkler (30)
-Aquamarine, Beige, Black, Blue, Brown, Coral, Cyan, Fuchsia, Gold, Gray, Green, Indigo, Khaki, Lavender, Lime, Magenta, Maroon, Navy, Olive, Orange, Pink, Purple, Red, Salmon, Silver, Teal, Turquoise, Violet, White, Yellow.
+### ⚠️ Bilinen Hatalar (Known Issues)
+*   **Lime (Misket Limonu) ve Green (Yeşil) Sorunu**: Sistem 29 rengi hatasız tanır ancak **Lime** renginde bazen hata yapabilir.
+    *   *Sebebi*: `color_table` ve veri setinde Lime ile Green tonlarının RGB kodları ve sensör tepkileri neredeyse aynıdır. Bu fiziksel benzerlik nedeniyle model bu iki tonu ayırt etmekte zorlanmaktadır.
 
 ---
 
 <a name="azərbaycan"></a>
-## 🇦🇿 Azərbaycan: ESP32-S3 ilə Yüksək Dəqiqlikli 30 Rəng Tanıma Sistemi
+## 🇦🇿 Azərbaycan: ESP32-S3 ilə Yüksək Dəqiqlikli Rəng Tanıma Sistemi
 
 ### 📌 Ümumi Məlumat
-Bu layihə, **ESP32-S3** mikrokontrolleri üzərində işləyən yüksək səviyyəli bir **TinyML rəng tanıma sistemidir**. Bahalı rəng sensorlarına ehtiyac olmadan, sadə bir **LDR (İşığa Həssas Rezistor)** və **RGB LED** istifadə edərək rəngləri mükəmməl dəqiqliklə ayırır.
+Bu layihə, **ESP32-S3** üzərində işləyən və **120.000 nümunəlik (dataset)** böyük bir baza ilə öyrədilmiş süni zəka sistemidir. 30 rəngdən 29-nu **100% dəqiqliklə** tanıyır. Bahalı rəng sensorları əvəzinə, LDR və RGB LED-lərdən ibarət xüsusi mühəndislik həlli istifadə olunur.
 
-Yaradılan sistem **TensorFlow Lite** modelindən istifadə edir və sensor oxumalarından **29 xüsusi optik göstərici** (feature) hesablayır. Bu üsulla "Salmon" və "Coral" kimi bir-birinə çox bənzəyən rəngləri belə səhvsiz tanıyır.
+### 🛠 Texniki Yaradılış və 3D Çap
+Dəqiq nəticə almaq üçün fiziki quruluş çox önəmlidir:
+*   **Forma**: 3D printerdə çap edilmiş **dairəvi boru** şəklindədir.
+*   **Sensorun Yeri**: **LDR** mərkəzdə yerləşir və işıqdan birbaşa təsirlənməməsi üçün **biraz aşağıda (dərinlikdə)** yerləşdirilib.
+*   **LED-lər**: LDR-in ətrafında bərabər məsafədə R (Qırmızı), G (Yaşıl) və B (Mavi) LED-lər düzülüb.
+*   **Çap Rəngi**: Detal mütləq **QARA (Black)** rəngdə çap olunmalıdır.
+    *   *Səbəb*: Açıq mavi (Light Blue) rəngli çaplarda işıq keçirmə və yansıma problemləri yaranır, bu da xətaya səbəb olur. Qara rəng ən təmiz nəticəni verir.
 
-### ✨ Əsas Özəlliklər
-*   **30 Fərqli Rəng**: Metalik rənglər (Gümüş, Qızıl) və incə tonlar daxil olmaqla.
-*   **Ağıllı Alqoritm**: R, G, B, Ağ və Qaranlıq oxumalarından alınan **29 riyazi parametr**.
-*   **Tam Avtonom**: İnternetə ehtiyac yoxdur, model birbaşa cihazda işləyir.
-*   **Stabil İşləmə**: İşıq dəyişikliklərinə qarşı kalibrasiya sistemi mövcuddur.
+### ⚙️ ESP32-S3 Ayarları (Arduino V2 üçün)
+Kodu yükləmək üçün bu parametrləri seçin ("Şəkildəki Ayarlar"):
 
-### 🛠 Qoşulma Qaydası (Pinout)
-*   **Beyin**: ESP32-S3.
-*   **Göz**: LDR + 10kΩ Rezistor.
-*   **İşıq**: RGB LED.
-*   **Pinlər**:
-
-| Komponent | ESP32-S3 Pini | Funksiya |
+| Parametr | Seçim | İzahı |
 | :--- | :--- | :--- |
-| **LDR Sensor** | **GPIO 7** | Analog Giriş |
-| **RGB LED - Qırmızı** | **GPIO 6** | Qırmızı İşıq |
-| **RGB LED - Yaşıl** | **GPIO 4** | Yaşıl İşıq |
-| **RGB LED - Mavi** | **GPIO 5** | Mavi İşıq |
+| **Board** | **ESP32S3 Dev Module** | Kart növü |
+| **USB CDC On Boot** | **Enabled** | Serial monitorda yazı görmək üçün |
+| **PSRAM** | **OPI PSRAM** | **VACİB**: Modelin işləməsi üçün əlavə yaddaş lazımdır |
+| **Partition Scheme** | **Default 4MB with Spiffs** | Yaddaş bölgüsü (LittleFS üçün) |
 
-### 🔬 İş Prinsipi
-1.  **Oxuma**: Cihaz sürətlə LED rənglərini dəyişir (Qırmızı, Yaşıl, Mavi, Ağ) və LDR üzərindən əks olunan işığı ölçür. Həmçinin LED sönülü ikən (Qaranlıq) mühit işığını ölçür.
-2.  **Hesablama**: Alınan 5 xam dəyər 29 fərqli məntiqi dəyişənə çevrilir (Məsələn: qırmızının yaşıla nisbəti, parlaqlıq balansı və s.).
-3.  **Nəticə**: Bu məlumatlar süni zəka modelinə göndərilir və model 30 rəng arasından ən uyğun olanını seçir.
+### 📂 LittleFS Yüklənməsi (Fayl Sistemi)
+Modeli (`model.tflite`) karta yazmaq üçün:
+1.  **Quraşdırma**: Arduino IDE 2.0 üçün "LittleFS Uploader" plaqinini (plugin) quraşdırın.
+2.  **Yazılma**:
+    *   `data` qovluğunun mövcud olduğunu yoxlayın.
+    *   ESP32-ni "Boot" rejiminə salın.
+    *   **Tools** menyusundan **Upload Filesystem Image** seçin.
 
-### 🎨 Dəstəklənən Rənglər (30)
-Aquamarine (Akvamarin), Beige (Bej), Black (Qara), Blue (Mavi), Brown (Qəhvəyi), Coral (Mərcan), Cyan (Mavi-yaşıl), Fuchsia (Fuksiya), Gold (Qızıl), Gray (Boz), Green (Yaşıl), Indigo (İndiqo), Khaki (Xaki), Lavender (Lavanda), Lime (Laym), Magenta (Maqneta), Maroon (Tünd qırmızı), Navy (Tünd göy), Olive (Zeytun), Orange (Narıncı), Pink (Çəhrayı), Purple (Bənövşəyi), Red (Qırmızı), Salmon (Somon), Silver (Gümüşü), Teal (Dəniz mavisi), Turquoise (Firuzəyi), Violet (Bənövşə), White (Ağ), Yellow (Sarı).
+### ⚠️ Məlum Xətalar (Problem)
+*   **Lime və Green (Yaşıl) Xətası**: Sistem 29 rəngi tam problemsiz (100%) tanıyır. Lakin **Lime** rəngində bəzən xəta ola bilir.
+    *   *Səbəbi*: `color_table` və real datasetdə Lime ilə Green rənglərinin tonları və RGB kodları eynidir. Fiziki olaraq eyni işıq qaytardıqları üçün model bu ikisini ayırmaqda çətinlik çəkir. Bu, yeganə istisnadır.

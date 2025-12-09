@@ -28,13 +28,13 @@
 #include "LittleFS.h"
 #include "control_led.h"
 
-// Pin təyinatları (Pin tanımları)
+// Pin təyinatları
 #define RED 6
 #define GREEN 4
 #define BLUE 5
 #define SENSOR 7
 
-// LED strukturu yaradılır (LED yapısı oluşturuluyor)
+// LED strukturu yaradılır
 ControlLED::Leds leds = {
   .R = RED,
   .G = GREEN,
@@ -42,23 +42,23 @@ ControlLED::Leds leds = {
   .S = SENSOR, 
 };
 
-// ControlLED obyekti yaradılır (ControlLED nesnesi oluşturuluyor)
+// ControlLED obyekti yaradılır
 ControlLED control = ControlLED(&leds);
 
-// Rəng adları siyahısı (Renk isimleri listesi)
+// Rəng adları siyahısı
 const char* colors[30] = {
   "Aquamarine", "Beige", "Black", "Blue", "Brown", "Coral", "Cyan", "Fuchsia", "Gold", "Gray",
   "Green", "Indigo", "Khaki", "Lavender", "Lime", "Magenta", "Maroon", "Navy", "Olive", "Orange",
   "Pink", "Purple", "Red", "Salmon", "Silver", "Teal", "Turquoise", "Violet", "White", "Yellow"
 };
 
-// TensorFlow Lite üçün qlobal dəyişənlər (Global variables for TensorFlow Lite)
+// TensorFlow Lite üçün qlobal dəyişənlər
 namespace {
 const tflite::Model* model = nullptr;
 tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input = nullptr;
 TfLiteTensor* output = nullptr;
-// Tensor arenası üçün yaddaş ayrılır (Tensor arena için bellek ayrılıyor)
+// Tensor arenası üçün yaddaş ayrılır (3.8 MB -> 29 xüsusiyyət və böyük model üçün)
 constexpr int kTensorArenaSize = 3800 * 1024;  // 3.8 MB → 29 xüsusiyyət + böyük model üçün
 uint8_t* tensor_arena = nullptr;
 }
@@ -90,59 +90,64 @@ bool loadModel() {
   return true;
 }
 
-// Rəngi proqnozlaşdırmaq üçün funksiya (Rengi tahmin etmek için fonksiyon)
+// Rəngi proqnozlaşdırmaq üçün funksiya
 void predictColor(int raw_r, int raw_g, int raw_b, int raw_w, int raw_d) {
   const float max_val = 3993.0f;
 
-  // Python-dakı kimi tərsinə çevir
+  // Python-dakı kimi dəyərləri tərsinə çevir (ADC oxuması işıqla tərs mütənasib ola bilər)
   float r_raw = max_val - raw_r;
   float g_raw = max_val - raw_g;
   float b_raw = max_val - raw_b;
   float w_raw = max_val - raw_w;
   float d_raw = raw_d;
-  d_raw = max(0.0f, min(d_raw, max_val));  // clip
+  float d_raw = raw_d;
+  d_raw = max(0.0f, min(d_raw, max_val));  // Dəyəri 0 və max_val aralığında saxla (clip)
 
-  // Dəyərləri normallaşdırır (Değerleri normalleştirir)
+  // Dəyərləri normallaşdırır (0.0 - 1.0 aralığına gətirir)
   float r = r_raw / max_val;
   float g = g_raw / max_val;
   float b = b_raw / max_val;
   float w = w_raw / max_val;
   float d = d_raw / max_val;
 
-  float total = r + g + b + 1e-8f;
+  // Rəng xüsusiyyətlərinin hesablanması (Python kodu ilə eyni məntiq)
+  float total = r + g + b + 1e-8f;       // Ümumi RGB cəmi
   float total_light = total;
 
-  float r_ratio = r / total;
-  float g_ratio = g / total;
-  float b_ratio = b / total;
+  float r_ratio = r / total;             // Qırmızının ümumi işığa nisbəti
+  float g_ratio = g / total;             // Yaşılın ümumi işığa nisbəti
+  float b_ratio = b / total;             // Mavinin ümumi işığa nisbəti
 
+  // Rəng güclərinin bir-birinə nisbəti
   float red_power = r / (g + g + b + 1e-8f);
   float green_power = g / (r + b + 1e-8f);
   float blue_power = b / (r + g + 1e-8f);
 
-  float white_balance = w / total;
-  float silver_fix = w - (r + g + b) / 3.0f;
+  float white_balance = w / total;             // Ağ işıq balansı
+  float silver_fix = w - (r + g + b) / 3.0f;   // Gümüş rəngi üçün düzəliş
 
+  // Təhlükəsiz logarifm funksiyası (mənfi dəyərlərdən qorunmaq üçün)
   auto safe_log1p = [](float x) {
     return log1p(max(0.0f, x));
   };
 
-  float salmon_signature = safe_log1p(r_raw * g_raw / (b_raw * b_raw + w_raw * w_raw + 1e-8f));
-  float green_dominance = tanh((g_raw - b_raw) / 1000.0f);
-  float rg_over_white = safe_log1p((r_raw + g_raw) / (w_raw + 1e-8f));
-  float fuchsia_index = safe_log1p(b_raw * b_raw / (r_raw + g_raw + 1e-8f));
-  float red_weakness = safe_log1p((g_raw + b_raw) / (r_raw + 1e-8f));
-  float blue_over_green = tanh((b_raw - g_raw) / 1000.0f);
-  float green_purity = g_raw / (r_raw + g_raw + b_raw + w_raw + 1e-8f);
+  // Mürəkkəb rəng imzaları (Features)
+  float salmon_signature = safe_log1p(r_raw * g_raw / (b_raw * b_raw + w_raw * w_raw + 1e-8f)); // Somon rəngi üçün
+  float green_dominance = tanh((g_raw - b_raw) / 1000.0f);   // Yaşılın dominantlığı
+  float rg_over_white = safe_log1p((r_raw + g_raw) / (w_raw + 1e-8f)); // Qırmızı-Yaşıl cəminin ağa nisbəti
+  float fuchsia_index = safe_log1p(b_raw * b_raw / (r_raw + g_raw + 1e-8f)); // Fuksiya üçün indeks
+  float red_weakness = safe_log1p((g_raw + b_raw) / (r_raw + 1e-8f)); // Qırmızının zəifliyi
+  float blue_over_green = tanh((b_raw - g_raw) / 1000.0f);   // Mavinin yaşıla qarşı üstünlüyü
+  float green_purity = g_raw / (r_raw + g_raw + b_raw + w_raw + 1e-8f); // Yaşılın safılığı
 
-  float beige_index = total_light - (r + g + b) / 3.0f;
-  float lightness_ratio = total_light / (r + g + b + 1e-8f);
-  float lime_index = g_ratio * total_light;
-  float yellow_index = (r_raw + g_raw) / (b_raw + w_raw + 1e-8f);
-  float coral_salmon_diff = safe_log1p(r_raw * g_raw / (b_raw * b_raw + w_raw * w_raw + 1e-8f));
-  float beige_white_diff = total_light - (r + g + b);
-  float lime_score = g_ratio * (1.0f - white_balance);
-  float gold_orange_diff = (r_raw + g_raw) / (b_raw + 1e-8f) - w_raw / max_val;
+  float beige_index = total_light - (r + g + b) / 3.0f;      // Bej rəngi üçün göstərici
+  float lightness_ratio = total_light / (r + g + b + 1e-8f); // İşıqlılıq nisbəti
+  float lime_index = g_ratio * total_light;                  // Laym rəngi üçün indeks
+  float yellow_index = (r_raw + g_raw) / (b_raw + w_raw + 1e-8f); // Sarı rəng indeksi
+  float coral_salmon_diff = safe_log1p(r_raw * g_raw / (b_raw * b_raw + w_raw * w_raw + 1e-8f)); // Mercan və Somon fərqi
+  float beige_white_diff = total_light - (r + g + b);        // Bej və Ağ fərqi
+  float lime_score = g_ratio * (1.0f - white_balance);       // Laym xalı
+  float gold_orange_diff = (r_raw + g_raw) / (b_raw + 1e-8f) - w_raw / max_val; // Qızıl və Narıncı fərqi
 
   // PYTHON-DAKI İLƏ EYNİ 29 XÜSUSİYYƏT!
   float features[29] = {
